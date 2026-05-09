@@ -29,14 +29,19 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
+    // Stuur exacte Brevo response terug voor debugging
     if (response.status === 201 || response.status === 204) {
       return res.status(200).json({ success: true });
-    } else if (response.status === 400 && data.code === 'duplicate_parameter') {
+    } else if (data.code === 'duplicate_parameter') {
       return res.status(200).json({ success: true, already: true });
     } else {
-      return res.status(400).json({ error: data.message || 'Inschrijving mislukt' });
+      return res.status(400).json({ 
+        error: data.message || 'Inschrijving mislukt',
+        brevo_code: data.code,
+        brevo_status: response.status
+      });
     }
   } catch (err) {
-    return res.status(500).json({ error: 'Serverfout' });
+    return res.status(500).json({ error: err.message });
   }
 }
