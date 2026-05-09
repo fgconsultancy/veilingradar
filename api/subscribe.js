@@ -9,34 +9,32 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Ongeldig e-mailadres' });
   }
 
-  const API_KEY = process.env.MAILCHIMP_API_KEY;
-  const AUDIENCE_ID = process.env.MAILCHIMP_AUDIENCE_ID;
-  const SERVER = process.env.MAILCHIMP_SERVER;
-
-  const url = `https://${SERVER}.api.mailchimp.com/3.0/lists/${AUDIENCE_ID}/members`;
+  const API_KEY = process.env.BREVO_API_KEY;
+  const LIST_ID = parseInt(process.env.BREVO_LIST_ID);
 
   try {
-    const response = await fetch(url, {
+    const response = await fetch('https://api.brevo.com/v3/contacts', {
       method: 'POST',
       headers: {
-        'Authorization': `Basic ${Buffer.from(`anystring:${API_KEY}`).toString('base64')}`,
+        'api-key': API_KEY,
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
       },
       body: JSON.stringify({
-        email_address: email,
-        status: 'subscribed',
-        tags: ['wachtlijst'],
+        email: email,
+        listIds: [LIST_ID],
+        updateEnabled: true,
       }),
     });
 
     const data = await response.json();
 
-    if (response.status === 200 || response.status === 201) {
+    if (response.status === 201 || response.status === 204) {
       return res.status(200).json({ success: true });
-    } else if (data.title === 'Member Exists') {
+    } else if (response.status === 400 && data.code === 'duplicate_parameter') {
       return res.status(200).json({ success: true, already: true });
     } else {
-      return res.status(400).json({ error: data.detail || 'Inschrijving mislukt' });
+      return res.status(400).json({ error: data.message || 'Inschrijving mislukt' });
     }
   } catch (err) {
     return res.status(500).json({ error: 'Serverfout' });
