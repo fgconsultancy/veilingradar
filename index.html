@@ -44,7 +44,6 @@
     background: var(--card); border: 1px solid var(--border);
     padding: 6px 16px; border-radius: 20px;
   }
-
   .hero {
     position: relative; z-index: 1;
     max-width: 820px; margin: 0 auto;
@@ -66,7 +65,6 @@
     0%, 100% { opacity: 1; transform: scale(1); }
     50% { opacity: 0.4; transform: scale(0.8); }
   }
-
   h1 {
     font-family: 'Syne', sans-serif;
     font-weight: 800;
@@ -78,20 +76,15 @@
   h1 .word-all { color: var(--text); display: block; margin-bottom: 4px; }
   h1 .word-auctions { color: var(--accent); display: block; margin-bottom: 4px; }
   h1 .word-tagline {
-    color: var(--text-muted);
-    font-weight: 600;
+    color: var(--text-muted); font-weight: 600;
     font-size: clamp(26px, 4vw, 50px);
-    letter-spacing: -0.02em;
-    display: block;
-    margin-top: 16px;
+    letter-spacing: -0.02em; display: block; margin-top: 16px;
   }
-
   .hero-sub {
     font-size: 17px; color: var(--text-muted); font-weight: 300;
     max-width: 500px; margin: 0 auto 56px; line-height: 1.8;
   }
   .hero-sub strong { color: var(--text); font-weight: 500; }
-
   .form-wrap { display: flex; gap: 10px; max-width: 480px; margin: 0 auto 16px; }
   .form-wrap input {
     flex: 1; background: var(--bg3); border: 1px solid var(--border);
@@ -110,8 +103,8 @@
   }
   .form-wrap button:hover { transform: translateY(-1px); opacity: 0.9; }
   .form-wrap button:active { transform: translateY(0); }
+  .form-wrap button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
   .form-note { font-size: 12px; color: var(--text-muted); }
-
   .counter-bar {
     display: flex; align-items: center; justify-content: center;
     gap: 10px; margin-top: 36px; font-size: 13px; color: var(--text-muted);
@@ -124,7 +117,6 @@
   .counter-avatars span:first-child { margin-left: 0; }
   .av1{background:#3B5EE8;} .av2{background:#E84B3B;} .av3{background:#3BE8A0;} .av4{background:#E8B43B;}
   .counter-num { color: var(--text); font-weight: 600; }
-
   .section { position: relative; z-index: 1; max-width: 960px; margin: 0 auto; padding: 72px 48px; }
   .section-label {
     font-size: 11px; font-weight: 600; text-transform: uppercase;
@@ -132,7 +124,6 @@
     display: flex; align-items: center; gap: 12px;
   }
   .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-
   .pain-grid {
     display: grid; grid-template-columns: 1fr 1fr; gap: 2px;
     background: var(--border); border-radius: 16px; overflow: hidden;
@@ -142,7 +133,6 @@
   .pain-icon { font-size: 26px; margin-bottom: 16px; }
   .pain-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 16px; margin-bottom: 10px; }
   .pain-desc { font-size: 14px; color: var(--text-muted); line-height: 1.7; }
-
   .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
   .feature-card {
     background: var(--card); border: 1px solid var(--border);
@@ -159,7 +149,6 @@
   .feature-num { font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 700; color: var(--accent); letter-spacing: 0.1em; margin-bottom: 14px; }
   .feature-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px; margin-bottom: 10px; }
   .feature-desc { font-size: 13px; color: var(--text-muted); line-height: 1.7; }
-
   .sources-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 32px; justify-content: center; }
   .source-chip {
     background: var(--card); border: 1px solid var(--border);
@@ -168,17 +157,15 @@
   }
   .source-chip:hover { border-color: var(--accent); color: var(--accent); }
   .source-chip.coming { opacity: 0.4; font-style: italic; }
-
   .cta-bottom { text-align: center; padding: 72px 48px 96px; position: relative; z-index: 1; }
   .cta-bottom h2 { font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(28px, 4vw, 48px); letter-spacing: -0.03em; margin-bottom: 14px; }
   .cta-bottom p { color: var(--text-muted); margin-bottom: 36px; font-size: 17px; }
-
   hr { border: none; border-top: 1px solid var(--border); position: relative; z-index: 1; }
   .success-msg { display: none; align-items: center; justify-content: center; gap: 10px; color: var(--accent); font-weight: 500; font-size: 15px; margin-top: 14px; }
   .success-msg.show { display: flex; }
+  .error-msg { display: none; align-items: center; justify-content: center; gap: 10px; color: #FF6B6B; font-size: 13px; margin-top: 10px; }
+  .error-msg.show { display: flex; }
   footer { position: relative; z-index: 1; text-align: center; padding: 28px 48px; border-top: 1px solid var(--border); font-size: 12px; color: var(--text-muted); }
-
-  /* MOBIEL */
   @media (max-width: 480px) {
     nav { padding: 20px 20px; }
     .logo { font-size: 18px; }
@@ -196,7 +183,6 @@
     .cta-bottom { padding: 48px 20px 64px; }
     footer { padding: 20px; }
   }
-
   @media (min-width: 481px) and (max-width: 640px) {
     nav { padding: 20px 24px; }
     .hero { padding: 64px 24px 48px; }
@@ -212,12 +198,10 @@
 </head>
 <body>
 <div class="ambient"></div>
-
 <nav>
   <div class="logo">Veiling<span>Radar</span></div>
   <div class="nav-badge">Binnenkort beschikbaar</div>
 </nav>
-
 <section class="hero">
   <div class="hero-tag">België · Coming Soon</div>
   <h1>
@@ -233,9 +217,10 @@
   </p>
   <div class="form-wrap" id="mainForm">
     <input type="email" id="emailInput" placeholder="jouw@email.be" />
-    <button onclick="handleSubmit()">Zet me op de lijst</button>
+    <button id="submitBtn1" onclick="handleSubmit('emailInput','submitBtn1','successMsg1','errorMsg1')">Zet me op de lijst</button>
   </div>
-  <div class="success-msg" id="successMsg">✓ &nbsp;Gelukt! Je staat op de wachtlijst.</div>
+  <div class="success-msg" id="successMsg1">✓ &nbsp;Gelukt! Je staat op de wachtlijst.</div>
+  <div class="error-msg" id="errorMsg1"></div>
   <p class="form-note">Geen spam. Enkel een bericht wanneer we live gaan.</p>
   <div class="counter-bar">
     <div class="counter-avatars">
@@ -244,9 +229,7 @@
     <span><span class="counter-num" id="counter">0</span> mensen wachten al mee</span>
   </div>
 </section>
-
 <hr>
-
 <section class="section">
   <div class="section-label">Waarom VeilingRadar</div>
   <div class="pain-grid">
@@ -256,9 +239,7 @@
     <div class="pain-card"><div class="pain-icon">🔔</div><div class="pain-title">Te laat van de veiling geweten</div><div class="pain-desc">De perfecte Transit stond op Hammertime. Je ontdekte het pas na afloop. Met een alert had je 10 minuten na plaatsing al een melding gehad.</div></div>
   </div>
 </section>
-
 <hr>
-
 <section class="section">
   <div class="section-label">Wat VeilingRadar doet</div>
   <div class="features">
@@ -270,9 +251,7 @@
     <div class="feature-card"><div class="feature-num">06</div><div class="feature-title">Mobiel-first</div><div class="feature-desc">Gebouwd voor smartphone. Veilingen verlopen razendsnel — je moet snel kunnen reageren, ook onderweg.</div></div>
   </div>
 </section>
-
 <hr>
-
 <section class="section" style="text-align:center; padding-top: 56px; padding-bottom: 56px;">
   <div class="section-label" style="justify-content:center;">Bronnen bij lancering</div>
   <div class="sources-row">
@@ -283,48 +262,71 @@
     <div class="source-chip coming">+ Auctelia (binnenkort)</div>
   </div>
 </section>
-
 <hr>
-
 <section class="cta-bottom">
   <h2>Klaar als we live gaan?</h2>
   <p>Schrijf je in en wij laten je als eerste weten wanneer VeilingRadar beschikbaar is.</p>
-  <div class="form-wrap" style="margin: 0 auto;">
+  <div class="form-wrap" id="ctaForm" style="margin: 0 auto;">
     <input type="email" id="emailInput2" placeholder="jouw@email.be" />
-    <button onclick="handleSubmit2()">Schrijf me in</button>
+    <button id="submitBtn2" onclick="handleSubmit('emailInput2','submitBtn2','successMsg2','errorMsg2')">Schrijf me in</button>
   </div>
   <div class="success-msg" id="successMsg2" style="margin-top:16px;">✓ &nbsp;Gelukt! Tot snel.</div>
+  <div class="error-msg" id="errorMsg2" style="margin-top:10px;"></div>
 </section>
-
 <footer>© 2026 VeilingRadar · België · <a href="#" style="color: var(--text-muted); text-decoration:none;">Privacy</a></footer>
-
 <script>
   let count = 0;
   const el = document.getElementById('counter');
-  function handleSubmit() {
-    const email = document.getElementById('emailInput').value;
+
+  async function handleSubmit(inputId, btnId, successId, errorId) {
+    const emailEl = document.getElementById(inputId);
+    const btn = document.getElementById(btnId);
+    const successEl = document.getElementById(successId);
+    const errorEl = document.getElementById(errorId);
+    const email = emailEl.value.trim();
+
     if (!email || !email.includes('@')) {
-      document.getElementById('emailInput').style.borderColor = 'rgba(255,107,53,0.6)';
-      setTimeout(() => document.getElementById('emailInput').style.borderColor = '', 1500);
+      emailEl.style.borderColor = 'rgba(255,107,53,0.6)';
+      setTimeout(() => emailEl.style.borderColor = '', 1500);
       return;
     }
-    document.getElementById('mainForm').style.display = 'none';
-    document.getElementById('successMsg').classList.add('show');
-    count++; el.textContent = count;
-  }
-  function handleSubmit2() {
-    const email = document.getElementById('emailInput2').value;
-    if (!email || !email.includes('@')) {
-      document.getElementById('emailInput2').style.borderColor = 'rgba(255,107,53,0.6)';
-      setTimeout(() => document.getElementById('emailInput2').style.borderColor = '', 1500);
-      return;
+
+    btn.disabled = true;
+    btn.textContent = 'Even wachten...';
+    errorEl.classList.remove('show');
+
+    try {
+      const res = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        emailEl.parentElement.style.display = 'none';
+        successEl.classList.add('show');
+        count++; el.textContent = count;
+      } else {
+        btn.disabled = false;
+        btn.textContent = inputId === 'emailInput' ? 'Zet me op de lijst' : 'Schrijf me in';
+        errorEl.textContent = 'Er ging iets mis. Probeer opnieuw.';
+        errorEl.classList.add('show');
+      }
+    } catch(e) {
+      btn.disabled = false;
+      btn.textContent = inputId === 'emailInput' ? 'Zet me op de lijst' : 'Schrijf me in';
+      errorEl.textContent = 'Geen verbinding. Probeer opnieuw.';
+      errorEl.classList.add('show');
     }
-    document.getElementById('emailInput2').parentElement.style.display = 'none';
-    document.getElementById('successMsg2').classList.add('show');
-    count++; el.textContent = count;
   }
-  document.getElementById('emailInput').addEventListener('keydown', e => { if (e.key === 'Enter') handleSubmit(); });
-  document.getElementById('emailInput2').addEventListener('keydown', e => { if (e.key === 'Enter') handleSubmit2(); });
+
+  document.getElementById('emailInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') handleSubmit('emailInput','submitBtn1','successMsg1','errorMsg1');
+  });
+  document.getElementById('emailInput2').addEventListener('keydown', e => {
+    if (e.key === 'Enter') handleSubmit('emailInput2','submitBtn2','successMsg2','errorMsg2');
+  });
 </script>
 </body>
 </html>
