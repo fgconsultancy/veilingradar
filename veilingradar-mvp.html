@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VeilingRadar — Belgische autoveilingen</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0A0C10; --bg2: #111318; --bg3: #181B22;
+    --accent: #E8FF47; --accent2: #FF6B35;
+    --text: #F0F2F7; --text-muted: #6B7280; --text-mid: #9CA3AF;
+    --border: rgba(255,255,255,0.06); --card: rgba(255,255,255,0.03);
+    --troostwijk: #3B82F6; --vavato: #10B981; --hammertime: #F59E0B;
+    --radius: 10px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; min-height:100vh; }
+
+  nav {
+    position:sticky; top:0; z-index:100;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 32px;
+    background:rgba(10,12,16,0.92); backdrop-filter:blur(20px);
+    border-bottom:1px solid var(--border);
+  }
+  .logo { font-family:'Syne',sans-serif; font-weight:800; font-size:20px; letter-spacing:-0.02em; }
+  .logo span { color:var(--accent); }
+  .nav-stats { display:flex; gap:20px; }
+  .nav-stat { font-size:12px; color:var(--text-muted); }
+  .nav-stat strong { color:var(--text); font-weight:500; }
+
+  .search-header { padding:40px 32px 24px; max-width:1200px; margin:0 auto; }
+  .search-title { font-family:'Syne',sans-serif; font-size:clamp(28px,4vw,42px); font-weight:800; letter-spacing:-0.03em; margin-bottom:24px; line-height:1.1; }
+  .search-title span { color:var(--accent); }
+
+  .search-bar { display:flex; gap:8px; margin-bottom:16px; }
+  .search-input {
+    flex:1; background:var(--bg3); border:1px solid var(--border);
+    border-radius:var(--radius); padding:14px 18px; color:var(--text);
+    font-family:'DM Sans',sans-serif; font-size:15px; outline:none; transition:border-color 0.2s;
+  }
+  .search-input::placeholder { color:var(--text-muted); }
+  .search-input:focus { border-color:rgba(232,255,71,0.4); }
+  .search-btn {
+    background:var(--accent); color:#0A0C10; border:none;
+    border-radius:var(--radius); padding:14px 24px;
+    font-family:'Syne',sans-serif; font-weight:700; font-size:14px;
+    cursor:pointer; white-space:nowrap; transition:opacity 0.2s;
+  }
+  .search-btn:hover { opacity:0.9; }
+
+  .filters { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px; align-items:center; }
+  .filter-select {
+    background:var(--bg3); border:1px solid var(--border); border-radius:8px;
+    padding:8px 28px 8px 14px; color:var(--text-mid);
+    font-family:'DM Sans',sans-serif; font-size:13px; outline:none; cursor:pointer;
+    appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236B7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:right 10px center;
+    background-color:var(--bg3);
+    transition:border-color 0.2s;
+  }
+  .filter-select:focus { border-color:rgba(232,255,71,0.3); }
+
+  .source-filter { display:flex; gap:6px; align-items:center; }
+  .source-btn {
+    padding:6px 14px; border-radius:20px; font-size:12px; font-weight:500;
+    cursor:pointer; border:1px solid var(--border); background:transparent;
+    color:var(--text-muted); transition:all 0.2s; font-family:'DM Sans',sans-serif;
+  }
+  .source-btn.active-all { background:rgba(232,255,71,0.1); border-color:var(--accent); color:var(--accent); }
+  .source-btn.active-troostwijk { background:rgba(59,130,246,0.15); border-color:var(--troostwijk); color:#93C5FD; }
+  .source-btn.active-vavato { background:rgba(16,185,129,0.15); border-color:var(--vavato); color:#6EE7B7; }
+  .source-btn.active-hammertime { background:rgba(245,158,11,0.15); border-color:var(--hammertime); color:#FCD34D; }
+
+  .results-info {
+    max-width:1200px; margin:0 auto; padding:0 32px 16px;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .results-count { font-size:13px; color:var(--text-muted); }
+  .results-count strong { color:var(--text); }
+  .sort-select {
+    background:transparent; border:1px solid var(--border); border-radius:8px;
+    padding:6px 12px; color:var(--text-muted); font-family:'DM Sans',sans-serif; font-size:13px; outline:none; cursor:pointer;
+  }
+
+  .grid {
+    max-width:1200px; margin:0 auto; padding:0 32px 80px;
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(300px,1fr)); gap:16px;
+  }
+
+  .car-card {
+    background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+    overflow:hidden; transition:transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+    cursor:pointer; text-decoration:none; display:block; position:relative;
+  }
+  .car-card:hover { transform:translateY(-3px); border-color:rgba(232,255,71,0.2); box-shadow:0 8px 32px rgba(0,0,0,0.4); }
+  .car-card:hover .card-img { transform:scale(1.03); }
+
+  .card-img-wrap { position:relative; aspect-ratio:4/3; overflow:hidden; background:var(--bg3); }
+  .card-img { width:100%; height:100%; object-fit:cover; transition:transform 0.4s ease; }
+  .card-img-placeholder { width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:var(--text-muted); font-size:32px; }
+
+  .source-badge {
+    position:absolute; top:10px; left:10px;
+    padding:4px 10px; border-radius:20px; font-size:11px; font-weight:600;
+    letter-spacing:0.04em; text-transform:uppercase; backdrop-filter:blur(8px);
+  }
+  .badge-troostwijk { background:rgba(59,130,246,0.85); color:white; }
+  .badge-vavato { background:rgba(16,185,129,0.85); color:white; }
+  .badge-hammertime { background:rgba(245,158,11,0.85); color:#1a1a1a; }
+
+  .closing-badge {
+    position:absolute; top:10px; right:10px;
+    background:rgba(0,0,0,0.75); backdrop-filter:blur(8px);
+    padding:4px 10px; border-radius:20px; font-size:11px; font-weight:500; color:var(--text-mid);
+  }
+  .closing-soon { color:var(--accent2) !important; }
+
+  .biedingen-badge {
+    position:absolute; bottom:10px; left:10px;
+    background:rgba(0,0,0,0.75); backdrop-filter:blur(8px);
+    padding:4px 10px; border-radius:20px; font-size:11px; color:var(--text-mid);
+  }
+  .biedingen-hot { color:#FCD34D !important; }
+
+  .card-body { padding:16px; }
+  .card-make { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-muted); margin-bottom:4px; }
+  .card-model { font-family:'Syne',sans-serif; font-weight:700; font-size:16px; letter-spacing:-0.02em; margin-bottom:8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--text); }
+  .card-meta { display:flex; gap:12px; font-size:12px; color:var(--text-muted); margin-bottom:12px; flex-wrap:wrap; }
+  .card-footer { display:flex; align-items:center; justify-content:space-between; padding-top:12px; border-top:1px solid var(--border); }
+  .card-price { font-family:'Syne',sans-serif; font-size:20px; font-weight:800; letter-spacing:-0.02em; color:var(--text); }
+  .card-price-label { font-size:10px; color:var(--text-muted); font-weight:400; }
+  .card-extra { text-align:right; }
+  .card-bouwjaar { font-size:13px; color:var(--text-muted); }
+
+  .alert-banner { max-width:1200px; margin:0 auto; padding:0 32px 20px; }
+  .alert-box {
+    background:rgba(232,255,71,0.06); border:1px solid rgba(232,255,71,0.2);
+    border-radius:var(--radius); padding:14px 20px;
+    display:flex; align-items:center; justify-content:space-between; gap:16px;
+  }
+  .alert-box p { font-size:13px; color:var(--text-mid); }
+  .alert-box strong { color:var(--accent); }
+  .alert-btn {
+    background:var(--accent); color:#0A0C10; border:none; border-radius:6px;
+    padding:8px 16px; font-family:'Syne',sans-serif; font-weight:700; font-size:12px;
+    cursor:pointer; white-space:nowrap; flex-shrink:0;
+  }
+
+  .empty-state { text-align:center; padding:80px 32px; color:var(--text-muted); grid-column:1/-1; }
+  .empty-state h3 { font-family:'Syne',sans-serif; font-size:20px; color:var(--text); margin-bottom:8px; }
+
+  @media(max-width:640px){
+    nav{padding:14px 20px;} .nav-stats{display:none;}
+    .search-header{padding:28px 20px 16px;}
+    .search-bar{flex-direction:column;}
+    .results-info{padding:0 20px 12px;}
+    .grid{padding:0 20px 60px; grid-template-columns:1fr;}
+    .alert-banner{padding:0 20px 16px;}
+    .filters{gap:6px;}
+  }
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo">Veiling<span>Radar</span></div>
+  <div class="nav-stats">
+    <div class="nav-stat"><strong id="totalCars">0</strong> auto's live</div>
+    <div class="nav-stat"><strong>3</strong> bronnen</div>
+    <div class="nav-stat">Troostwijk · Vavato · Hammertime</div>
+  </div>
+</nav>
+
+<div class="search-header">
+  <h1 class="search-title">Alle Belgische<br><span>autoveilingen</span> op één plek.</h1>
+  <div class="search-bar">
+    <input type="text" class="search-input" id="searchInput" placeholder="Zoek op merk of model... (BMW, Golf, Jaguar, Peugeot...)" />
+    <button class="search-btn" onclick="applyFilters()">Zoeken</button>
+  </div>
+  <div class="filters">
+    <select class="filter-select" id="merkFilter" onchange="applyFilters()"><option value="">Alle merken</option></select>
+    <select class="filter-select" id="prijsFilter" onchange="applyFilters()">
+      <option value="">Alle prijzen</option>
+      <option value="0-500">Onder €500</option>
+      <option value="500-2000">€500 – €2.000</option>
+      <option value="2000-5000">€2.000 – €5.000</option>
+      <option value="5000-10000">€5.000 – €10.000</option>
+      <option value="10000-999999">Boven €10.000</option>
+    </select>
+    <select class="filter-select" id="bouwjaarFilter" onchange="applyFilters()">
+      <option value="">Alle jaren</option>
+      <option value="2020-2030">2020 of nieuwer</option>
+      <option value="2015-2019">2015 – 2019</option>
+      <option value="2010-2014">2010 – 2014</option>
+      <option value="2000-2009">2000 – 2009</option>
+      <option value="0-1999">Voor 2000</option>
+    </select>
+    <div class="source-filter">
+      <button class="source-btn active-all" id="btnAll" onclick="filterSource('all')">Alle</button>
+      <button class="source-btn" id="btnTroostwijk" onclick="filterSource('troostwijk')">Troostwijk</button>
+      <button class="source-btn" id="btnVavato" onclick="filterSource('vavato')">Vavato</button>
+      <button class="source-btn" id="btnHammertime" onclick="filterSource('hammertime')">Hammertime</button>
+    </div>
+  </div>
+</div>
+
+<div class="alert-banner">
+  <div class="alert-box">
+    <p>Stel een <strong>gratis alert</strong> in — ontvang een melding zodra jouw auto beschikbaar komt op één van de 3 platforms.</p>
+    <button class="alert-btn">Alert instellen</button>
+  </div>
+</div>
+
+<div class="results-info">
+  <div class="results-count"><strong id="resultCount">0</strong> resultaten gevonden</div>
+  <select class="sort-select" id="sortSelect" onchange="applyFilters()">
+    <option value="sluit">Sluit het eerst</option>
+    <option value="prijs-laag">Prijs: laag → hoog</option>
+    <option value="prijs-hoog">Prijs: hoog → laag</option>
+    <option value="biedingen">Meest biedingen</option>
+    <option value="bouwjaar">Nieuwste eerst</option>
+  </select>
+</div>
+
+<div class="grid" id="carGrid"></div>
+
+<script>
+const troostwijkData = [
+  {id:"T-5349",merk:"Ford",model:"Focus Wagon 1.6 TI-VCT",bouwjaar:2011,prijs:500,biedingen:11,sluitEnd:null,sluitCountdown:"00:26:03",link:"https://www.troostwijkauctions.com/l/ford-focus-wagon-1-6-ti-vct-lease-ti-car-2011-A3-43522-5349",foto:"https://media.tbauctions.com/image-media/7faa5776-c0c8-4bec-9a0f-37ee28e73618/file?imageSize=512x384",bron:"troostwijk",locatie:"Maasmechelen"},
+  {id:"T-11917",merk:"Ford",model:"Tourneo Custom 8 zitplaatsen",bouwjaar:2022,prijs:14000,biedingen:72,sluitEnd:null,sluitCountdown:"00:00:03",link:"https://www.troostwijkauctions.com/l/2022-ford-tourneo-custom-%25288-zitplaatsen%2529-A3-43522-11917",foto:"https://media.tbauctions.com/image-media/405014ca-c9d9-4501-a413-bd6e5ad1adcb/file?imageSize=512x384",bron:"troostwijk",locatie:"België"},
+  {id:"T-6491",merk:"Triumph",model:"Roadster Oldtimer",bouwjaar:1949,prijs:17500,biedingen:17,sluitEnd:null,sluitCountdown:"00:26:03",link:"https://www.troostwijkauctions.com/l/1949-triumph-roadster-oldtimer-A3-43522-6491",foto:"https://media.tbauctions.com/image-media/a3ffc9fd-0d33-4dd2-854f-16bd86db16fe/file?imageSize=512x384",bron:"troostwijk",locatie:"België"},
+  {id:"T-4804",merk:"Jaguar",model:"F-Pace 20D AWD",bouwjaar:2017,prijs:9000,biedingen:91,sluitEnd:null,sluitCountdown:"00:00:03",link:"https://www.troostwijkauctions.com/l/2017-jaguar-f-pace-20d-awd-A3-43522-4804",foto:"https://media.tbauctions.com/image-media/4a64becd-6077-411f-8585-f4e2ed07d59b/file?imageSize=512x384",bron:"troostwijk",locatie:"Oostakker"},
+  {id:"T-5372",merk:"Citroën",model:"Xsara Picasso 1.8i",bouwjaar:2004,prijs:500,biedingen:2,sluitEnd:null,sluitCountdown:"00:26:03",link:"https://www.troostwijkauctions.com/l/citroen-xsara-picasso-1-8i-16v-difference2-car-2004-A3-43522-5372",foto:"https://media.tbauctions.com/image-media/351fc203-f8b3-42c9-b57a-ddaae215ad79/file?imageSize=512x384",bron:"troostwijk",locatie:"Maasmechelen"},
+  {id:"T-20924",merk:"Volkswagen",model:"Golf 7 GTI",bouwjaar:2017,prijs:13000,biedingen:173,sluitEnd:null,sluitCountdown:"00:05:03",link:"https://www.troostwijkauctions.com/l/2017-volkswagen-golf-7-gti-personenauto-A3-43522-20924",foto:"https://media.tbauctions.com/image-media/91f404ff-5d6f-4384-a1c1-ea7a16f9f15d/file?imageSize=512x384",bron:"troostwijk",locatie:"Ekeren"},
+  {id:"T-5012",merk:"Fiat",model:"Grande Punto 1.4",bouwjaar:2006,prijs:500,biedingen:5,sluitEnd:null,sluitCountdown:"00:26:03",link:"https://www.troostwijkauctions.com/l/fiat-grande-punto-1-4-sportsound-car-2006-A3-43522-5012",foto:"https://media.tbauctions.com/image-media/abf169a7-05b2-4cb4-8328-ad83c26fcbcb/file?imageSize=512x384",bron:"troostwijk",locatie:"Maasmechelen"},
+  {id:"T-5371",merk:"Citroën",model:"Berlingo 2.0 HDI",bouwjaar:2004,prijs:500,biedingen:5,sluitEnd:null,sluitCountdown:"00:26:03",link:"https://www.troostwijkauctions.com/l/citroen-berlingo-2-0-hdi-600-car-2004-A3-43522-5371",foto:"https://media.tbauctions.com/image-media/3a8760b0-3ac6-4e66-8ff2-0b545eef5b9f/file?imageSize=512x384",bron:"troostwijk",locatie:"Maasmechelen"},
+  {id:"T-21303",merk:"Ford",model:"KA",bouwjaar:2005,prijs:400,biedingen:8,sluitEnd:null,sluitCountdown:"00:26:03",link:"https://www.troostwijkauctions.com/l/2005-ford-ka-personenauto-A3-43522-21303",foto:"https://media.tbauctions.com/image-media/d0437261-a9eb-46c4-be2e-aaceb0e541b6/file?imageSize=512x384",bron:"troostwijk",locatie:"Turnhout"},
+  {id:"T-21880",merk:"Peugeot",model:"307",bouwjaar:2004,prijs:200,biedingen:10,sluitEnd:null,sluitCountdown:"00:26:02",link:"https://www.troostwijkauctions.com/l/2004-peugeot-307-personenauto-A3-43522-21880",foto:"https://media.tbauctions.com/image-media/cb65a7f8-8bdc-48cc-bace-a4e614c52e68/file?imageSize=512x384",bron:"troostwijk",locatie:"Turnhout"},
+  {id:"T-19012",merk:"Seat",model:"Ibiza",bouwjaar:2003,prijs:350,biedingen:5,sluitEnd:null,sluitCountdown:"00:26:02",link:"https://www.troostwijkauctions.com/l/2003-seat-ibiza-personenauto-A3-43522-19012",foto:"https://media.tbauctions.com/image-media/b6e2ea04-e08e-4eee-ac76-a3645450fb49/file?imageSize=512x384",bron:"troostwijk",locatie:"Meerle"},
+  {id:"T-5373",merk:"Opel",model:"Corsa 1.4-16V Sport",bouwjaar:2001,prijs:300,biedingen:4,sluitEnd:null,sluitCountdown:"00:26:02",link:"https://www.troostwijkauctions.com/l/opel-corsa-1-4-16v-sport-car-2001-A3-43522-5373",foto:"https://media.tbauctions.com/image-media/697e86f8-ded5-4284-95dc-4a32490edd9e/file?imageSize=512x384",bron:"troostwijk",locatie:"Maasmechelen"},
+  {id:"T-21",merk:"BMW",model:"X5 7 zitplaatsen",bouwjaar:2007,prijs:9000,biedingen:68,sluitEnd:null,sluitCountdown:"00:09:02",link:"https://www.troostwijkauctions.com/l/bmw-x5-7-zitplaatsen-2007-A3-43522-21",foto:"https://media.tbauctions.com/image-media/1b1e2dc1-2e81-41af-bb9c-0786bbcfb556/file?imageSize=512x384",bron:"troostwijk",locatie:"Sint-Niklaas"},
+  {id:"T-30916",merk:"Peugeot",model:"206cc Cabriolet",bouwjaar:2004,prijs:660,biedingen:19,sluitEnd:null,sluitCountdown:"00:11:02",link:"https://www.troostwijkauctions.com/l/peugeot-2004-206cc-cabriolet-auto-A3-43522-30916",foto:"https://media.tbauctions.com/image-media/a4cc3d70-53df-47fd-b329-db7ae1b6cf0a/file?imageSize=512x384",bron:"troostwijk",locatie:"Wegnez"},
+  {id:"T-4057",merk:"Ford",model:"Puma ST Line 1.0",bouwjaar:2023,prijs:9500,biedingen:94,sluitEnd:null,sluitCountdown:"00:01:02",link:"https://www.troostwijkauctions.com/l/2023-ford-pluma-st-line-1-0-A3-43522-4057",foto:"https://media.tbauctions.com/image-media/d65b909a-2667-4d4b-8626-47cf9a857445/file?imageSize=512x384",bron:"troostwijk",locatie:"Oostakker"},
+  {id:"T-30875",merk:"Talbot",model:"Samba Voorouders",bouwjaar:1984,prijs:170,biedingen:19,sluitEnd:null,sluitCountdown:"00:03:02",link:"https://www.troostwijkauctions.com/l/1984-talbot-samba-voorouders-A3-43522-30875",foto:"https://media.tbauctions.com/image-media/39087882-2207-4f06-b65c-7095246c6f57/file?imageSize=512x384",bron:"troostwijk",locatie:"Wegnez"},
+];
+
+const vavatoData = [
+  {id:"V-21",merk:"BMW",model:"X5 7 zitplaatsen",bouwjaar:2007,prijs:7500,biedingen:68,sluitCountdown:"00:00:40",link:"https://www.vavato.com/l/bmw-x5-7-zitplaatsen-2007-A3-43522-21",foto:"https://media.tbauctions.com/image-media/1b1e2dc1-2e81-41af-bb9c-0786bbcfb556/file?imageSize=512x384",bron:"vavato",locatie:"Sint-Niklaas"},
+  {id:"V-21880",merk:"Peugeot",model:"307",bouwjaar:2004,prijs:200,biedingen:10,sluitCountdown:"00:29:40",link:"https://www.vavato.com/l/2004-peugeot-307-personenauto-A3-43522-21880",foto:"https://media.tbauctions.com/image-media/cb65a7f8-8bdc-48cc-bace-a4e614c52e68/file?imageSize=512x384",bron:"vavato",locatie:"Turnhout"},
+  {id:"V-6101",merk:"Land Rover",model:"Range Rover Evoque",bouwjaar:2017,prijs:7200,biedingen:99,sluitCountdown:"00:01:40",link:"https://www.vavato.com/l/2017-land-rover-range-rover-evoque-personenauto-A3-43522-6101",foto:"https://media.tbauctions.com/image-media/fe07b56b-2b8a-4cb0-8058-ea380efe0e95/file?imageSize=512x384",bron:"vavato",locatie:"Eeklo"},
+  {id:"V-5349",merk:"Ford",model:"Focus Wagon 1.6 TI-VCT",bouwjaar:2011,prijs:500,biedingen:11,sluitCountdown:"00:29:40",link:"https://www.vavato.com/l/ford-focus-wagon-1-6-ti-vct-lease-ti-car-2011-A3-43522-5349",foto:"https://media.tbauctions.com/image-media/7faa5776-c0c8-4bec-9a0f-37ee28e73618/file?imageSize=512x384",bron:"vavato",locatie:"Maasmechelen"},
+  {id:"V-21303",merk:"Ford",model:"KA",bouwjaar:2005,prijs:400,biedingen:8,sluitCountdown:"00:29:40",link:"https://www.vavato.com/l/2005-ford-ka-personenauto-A3-43522-21303",foto:"https://media.tbauctions.com/image-media/d0437261-a9eb-46c4-be2e-aaceb0e541b6/file?imageSize=512x384",bron:"vavato",locatie:"Turnhout"},
+  {id:"V-8243",merk:"Opel",model:"Corsa",bouwjaar:2008,prijs:710,biedingen:13,sluitCountdown:"00:01:40",link:"https://www.vavato.com/l/2008-opel-corsa-A3-43522-8243",foto:"https://media.tbauctions.com/image-media/cdc9367d-6b66-438c-bf7e-8fefb0cce945/file?imageSize=512x384",bron:"vavato",locatie:"Lokeren"},
+  {id:"V-4057",merk:"Ford",model:"Puma ST Line 1.0",bouwjaar:2023,prijs:9500,biedingen:95,sluitCountdown:"00:04:40",link:"https://www.vavato.com/l/2023-ford-pluma-st-line-1-0-A3-43522-4057",foto:"https://media.tbauctions.com/image-media/d65b909a-2667-4d4b-8626-47cf9a857445/file?imageSize=512x384",bron:"vavato",locatie:"Oostakker"},
+  {id:"V-11917",merk:"Ford",model:"Tourneo Custom 8 zitplaatsen",bouwjaar:2022,prijs:14000,biedingen:72,sluitCountdown:"00:03:40",link:"https://www.vavato.com/l/2022-ford-tourneo-custom-%25288-zitplaatsen%2529-A3-43522-11917",foto:"https://media.tbauctions.com/image-media/405014ca-c9d9-4501-a413-bd6e5ad1adcb/file?imageSize=512x384",bron:"vavato",locatie:"België"},
+  {id:"V-20924",merk:"Volkswagen",model:"Golf 7 GTI",bouwjaar:2017,prijs:12500,biedingen:172,sluitCountdown:"00:08:40",link:"https://www.vavato.com/l/2017-volkswagen-golf-7-gti-personenauto-A3-43522-20924",foto:"https://media.tbauctions.com/image-media/91f404ff-5d6f-4384-a1c1-ea7a16f9f15d/file?imageSize=512x384",bron:"vavato",locatie:"Ekeren"},
+  {id:"V-30875",merk:"Talbot",model:"Samba Voorouders",bouwjaar:1984,prijs:170,biedingen:19,sluitCountdown:"00:06:39",link:"https://www.vavato.com/l/1984-talbot-samba-voorouders-A3-43522-30875",foto:"https://media.tbauctions.com/image-media/39087882-2207-4f06-b65c-7095246c6f57/file?imageSize=512x384",bron:"vavato",locatie:"Wegnez"},
+  {id:"V-6491",merk:"Triumph",model:"Roadster Oldtimer",bouwjaar:1949,prijs:17500,biedingen:17,sluitCountdown:"00:29:39",link:"https://www.vavato.com/l/1949-triumph-roadster-oldtimer-A3-43522-6491",foto:"https://media.tbauctions.com/image-media/a3ffc9fd-0d33-4dd2-854f-16bd86db16fe/file?imageSize=512x384",bron:"vavato",locatie:"België"},
+  {id:"V-5012",merk:"Fiat",model:"Grande Punto 1.4",bouwjaar:2006,prijs:500,biedingen:5,sluitCountdown:"00:29:39",link:"https://www.vavato.com/l/fiat-grande-punto-1-4-sportsound-car-2006-A3-43522-5012",foto:"https://media.tbauctions.com/image-media/abf169a7-05b2-4cb4-8328-ad83c26fcbcb/file?imageSize=512x384",bron:"vavato",locatie:"Maasmechelen"},
+  {id:"V-1018",merk:"Volkswagen",model:"Buggy Oldtimer",bouwjaar:null,prijs:5500,biedingen:127,sluitCountdown:"",link:"https://www.vavato.com/l/volkswagen-buggy-originele-oldtimer-A3-43522-1018",foto:"https://media.tbauctions.com/image-media/a1e6ce14-6423-433a-9078-192fe54d8f64/file?imageSize=512x384",bron:"vavato",locatie:"Oudenaarde"},
+  {id:"V-4804",merk:"Jaguar",model:"F-Pace 20D AWD",bouwjaar:2017,prijs:9000,biedingen:92,sluitCountdown:"00:03:39",link:"https://www.vavato.com/l/2017-jaguar-f-pace-20d-awd-A3-43522-4804",foto:"https://media.tbauctions.com/image-media/4a64becd-6077-411f-8585-f4e2ed07d59b/file?imageSize=512x384",bron:"vavato",locatie:"Oostakker"},
+];
+
+// Hammertime data - einddatum gebaseerd, countdown berekend vanaf nu
+function getHammertimeCountdown(einddatum) {
+  const [datePart, timePart] = einddatum.split(' ');
+  const [day, month, year] = datePart.split('-');
+  const [hours, minutes] = timePart.split(':');
+  const endDate = new Date(year, month-1, day, hours, minutes, 0);
+  const now = new Date();
+  const diffMs = endDate - now;
+  if (diffMs <= 0) return null;
+  const totalSecs = Math.floor(diffMs / 1000);
+  const h = Math.floor(totalSecs / 3600);
+  const m = Math.floor((totalSecs % 3600) / 60);
+  const s = totalSecs % 60;
+  return {totalSecs, display: `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`};
+}
+
+const hammertimeRaw = [
+  {id:"HT-1",merk:"Audi",model:"A3 Sedan tdi ultra",bouwjaar:2015,prijs:1800,biedingen:67,einddatum:"12-05-2026 20:00",link:"https://www.hammertime.be/nl/lot/lot-details/388783/audi-a3-sedan-tdi-ultra-attraction-2015",foto:"https://cdn.aeman.nl/AE_Hammertime/thumb/47c3c4f1-2ab6-4d93-95d8-902fe686668f",bron:"hammertime",locatie:"België"},
+  {id:"HT-5",merk:"Audi",model:"Q7 3.0 tdi v6 quattro",bouwjaar:2015,prijs:8600,biedingen:110,einddatum:"12-05-2026 20:00",link:"https://www.hammertime.be/nl/lot/lot-details/388784/audi-q7-3-0-tdi-v6-quattro-tiptronic-272-at-2015",foto:"https://cdn.aeman.nl/AE_Hammertime/thumb/d62b7952-4f3b-485a-99bd-9f38fd630542",bron:"hammertime",locatie:"België"},
+  {id:"HT-9",merk:"Citroën",model:"Berlingo Multispace 1.6 bluehdi",bouwjaar:2018,prijs:5000,biedingen:21,einddatum:"12-05-2026 20:01",link:"https://www.hammertime.be/nl/lot/lot-details/388786/citroen-berlingo-multispace-1-6-bluehdi-xtr-etg-98-at-2018",foto:"https://cdn.aeman.nl/AE_Hammertime/thumb/c501431a-38ed-4e11-a771-03b2329a2341",bron:"hammertime",locatie:"België"},
+  {id:"HT-13",merk:"Citroën",model:"C3 1.2 puretech shine",bouwjaar:2017,prijs:1699,biedingen:48,einddatum:"12-05-2026 20:02",link:"https://www.hammertime.be/nl/lot/lot-details/388787/citroen-c3-1-2-puretech-shine-eat6-s-s-110-at-2017",foto:"https://cdn.aeman.nl/AE_Hammertime/thumb/42fa2ee8-fd3d-4e30-9f30-584e570384b5",bron:"hammertime",locatie:"België"},
+  {id:"HT-17",merk:"Citroën",model:"C3 1.1i tentation",bouwjaar:2004,prijs:200,biedingen:0,einddatum:"12-05-2026 20:02",link:"https://www.hammertime.be/nl/lot/lot-details/388788/citroen-c3-1-1i-tentation-2004",foto:"https://cdn.aeman.nl/AE_Hammertime/thumb/36bb0a58-1a5e-4634-a11f-c7a3fe128ce0",bron:"hammertime",locatie:"België"},
+  {id:"HT-21",merk:"Citroën",model:"C4 Cactus 1.2i vti live",bouwjaar:2015,prijs:1500,biedingen:60,einddatum:"12-05-2026 20:03",link:"https://www.hammertime.be/nl/lot/lot-details/388789/citroen-c4-cactus-1-2i-vti-live-2015",foto:"https://cdn.aeman.nl/AE_Hammertime/thumb/e6ed878e-ca44-4204-831d-3de5d319bb5f",bron:"hammertime",locatie:"België"},
+  {id:"HT-25",merk:"Citroën",model:"C4 Cactus 1.2 puretech feel",bouwjaar:2016,prijs:1250,biedingen:52,einddatum:"12-05-2026 20:03",link:"https://www.hammertime.be/nl/lot/lot-details/388790/citroen-c4-cactus-1-2-puretech-feel-2016",foto:"https://cdn.aeman.nl/AE_Hammertime/thumb/3874243e-3fe3-4e6e-ba5a-f05db16ac46b",bron:"hammertime",locatie:"België"},
+  {id:"HT-29",merk:"Citroën",model:"Xsara Picasso 1.6 hdi",bouwjaar:2009,prijs:200,biedingen:0,einddatum:"12-05-2026 20:04",link:"https://www.hammertime.be/nl/lot/lot-details/388791/citroen-xsara-picasso-1-6-hdi-tentation-2009",foto:"https://cdn.aeman.nl/AE_Hammertime/thumb/ee320ae0-1404-4e3c-bcb5-3808c9803f60",bron:"hammertime",locatie:"België"},
+  {id:"HT-33",merk:"Dacia",model:"Sandero Stepway 1.6i",bouwjaar:2011,prijs:1300,biedingen:36,einddatum:"12-05-2026 20:04",link:"https://www.hammertime.be/nl/lot/lot-details/388792/dacia-sandero-stepway-1-6i-2011",foto:"https://cdn.aeman.nl/AE_Hammertime/thumb/523249d2-893a-43de-9339-2d45d4a8a148",bron:"hammertime",locatie:"België"},
+  {id:"HT-37",merk:"Fiat",model:"500 lounge MTA GPS",bouwjaar:2019,prijs:4250,biedingen:39,einddatum:"12-05-2026 20:05",link:"https://www.hammertime.be/nl/lot/lot-details/388793/fiat-500-lounge-mta-gps-2019",foto:"https://cdn.aeman.nl/AE_Hammertime/thumb/6483fc82-0c41-4baf-ae5f-e769c989292a",bron:"hammertime",locatie:"België"},
+  {id:"HT-41",merk:"Ford",model:"Fiesta 1.25i ambiente",bouwjaar:2010,prijs:1400,biedingen:36,einddatum:"12-05-2026 20:05",link:"https://www.hammertime.be/nl/lot/lot-details/388794/ford-fiesta-1-25i-ambiente-2010",foto:"https://cdn.aeman.nl/AE_Hammertime/thumb/cf6c8b9b-8a7b-4c64-ac1c-21a7169ae06b",bron:"hammertime",locatie:"België"},
+  {id:"HT-45",merk:"Ford",model:"Fiesta 1.4 tdci trend",bouwjaar:2012,prijs:2150,biedingen:58,einddatum:"12-05-2026 20:06",link:"https://www.hammertime.be/nl/lot/lot-details/388795/ford-fiesta-1-4-tdci-sound-connection-trend-dpf-2012",foto:"https://cdn.aeman.nl/AE_Hammertime/thumb/ccd6781a-23e0-4d93-a0d0-21a250a108a8",bron:"hammertime",locatie:"België"},
+  {id:"HT-49",merk:"Ford",model:"Focus 1.0 ecoboost titanium",bouwjaar:2013,prijs:850,biedingen:24,einddatum:"12-05-2026 20:06",link:"https://www.hammertime.be/nl/lot/lot-details/388796/ford-focus-1-0-ecoboost-econetic-tech-titanium-2013",foto:"https://cdn.aeman.nl/AE_Hammertime/thumb/fc6c78a4-6c28-4aa7-901b-372bd9d9311c",bron:"hammertime",locatie:"België"},
+  {id:"HT-53",merk:"Ford",model:"Focus SW 1.6i ambiente",bouwjaar:2002,prijs:230,biedingen:3,einddatum:"12-05-2026 20:07",link:"https://www.hammertime.be/nl/lot/lot-details/388797/ford-focus-sw-1-6i-16v-ambiente-2002",foto:"https://cdn.aeman.nl/AE_Hammertime/thumb/06d51d2d-f597-43f6-8f07-16562d20c2ad",bron:"hammertime",locatie:"België"},
+  {id:"HT-57",merk:"Ford",model:"Fusion 1.4i ambiente",bouwjaar:2006,prijs:220,biedingen:2,einddatum:"12-05-2026 20:07",link:"https://www.hammertime.be/nl/lot/lot-details/388798/ford-fusion-1-4i-ambiente-2006",foto:"https://cdn.aeman.nl/AE_Hammertime/thumb/8ffd6c53-f695-425d-9e7d-c744a2f0a5c8",bron:"hammertime",locatie:"België"},
+  {id:"HT-61",merk:"Hyundai",model:"i30 1.6 crdi sky dct",bouwjaar:2019,prijs:5500,biedingen:51,einddatum:"12-05-2026 20:08",link:"https://www.hammertime.be/nl/lot/lot-details/388799/hyundai-i30-1-6-crdi-sky-dct-136-at-2019",foto:"https://cdn.aeman.nl/AE_Hammertime/thumb/b401e751-a452-4202-a798-bad9ed0604b7",bron:"hammertime",locatie:"België"},
+  {id:"HT-65",merk:"Hyundai",model:"iX35",bouwjaar:2013,prijs:1200,biedingen:37,einddatum:"12-05-2026 20:08",link:"https://www.hammertime.be/nl/lot/lot-details/388800/hyundai-ix35-2013",foto:"https://cdn.aeman.nl/AE_Hammertime/thumb/9bad3f40-fd69-423d-b580-d53bc5c2bb57",bron:"hammertime",locatie:"België"},
+  {id:"HT-69",merk:"Jaguar",model:"XF 2.0 d r-sport",bouwjaar:2017,prijs:3150,biedingen:87,einddatum:"12-05-2026 20:09",link:"https://www.hammertime.be/nl/lot/lot-details/388801/jaguar-xf-2-0-d-r-sport-180-at-2017",foto:"https://cdn.aeman.nl/AE_Hammertime/thumb/b28016eb-86c3-4c9a-b598-728c51532140",bron:"hammertime",locatie:"België"},
+  {id:"HT-73",merk:"Kia",model:"Picanto 1.0i lounge",bouwjaar:2016,prijs:1800,biedingen:13,einddatum:"12-05-2026 20:09",link:"https://www.hammertime.be/nl/lot/lot-details/388802/kia-picanto-1-0i-lounge-2016",foto:"https://cdn.aeman.nl/AE_Hammertime/thumb/6be6a90a-509b-4aaa-a229-17f598a6d4f7",bron:"hammertime",locatie:"België"},
+  {id:"HT-77",merk:"Kia",model:"Sportage 1.7 crdi 2wd lounge",bouwjaar:2017,prijs:5000,biedingen:56,einddatum:"12-05-2026 20:10",link:"https://www.hammertime.be/nl/lot/lot-details/388803/kia-sportage-1-7-crdi-2wd-lounge-isg-2017",foto:"https://cdn.aeman.nl/AE_Hammertime/thumb/6ab311c7-aadf-48fb-9f9b-cb243bc31934",bron:"hammertime",locatie:"België"},
+  {id:"HT-81",merk:"Mercedes-Benz",model:"A-Class a 160 blueefficiency",bouwjaar:2009,prijs:240,biedingen:4,einddatum:"12-05-2026 20:10",link:"https://www.hammertime.be/nl/lot/lot-details/388804/mercedes-benz-a-class-5p-d-w169-a-160-blueefficiency-avantgarde-2009",foto:"https://cdn.aeman.nl/AE_Hammertime/thumb/9ecf4c6a-8330-4692-b355-f4e6dde182bc",bron:"hammertime",locatie:"België"},
+  {id:"HT-85",merk:"Mercedes-Benz",model:"E-Class e 200 cdi classic",bouwjaar:2008,prijs:900,biedingen:19,einddatum:"12-05-2026 20:11",link:"https://www.hammertime.be/nl/lot/lot-details/388805/mercedes-benz-e-class-sw-s211-e-200-cdi-classic-136-at-2008",foto:"https://cdn.aeman.nl/AE_Hammertime/thumb/ce91861d-072c-4fa7-808a-51cb701eae3f",bron:"hammertime",locatie:"België"},
+  {id:"HT-89",merk:"Mini",model:"Cooper 1.6 d",bouwjaar:2009,prijs:1300,biedingen:46,einddatum:"12-05-2026 20:11",link:"https://www.hammertime.be/nl/lot/lot-details/388806/mini-mini-r56-mini-1-6-d-cooper-2009",foto:"https://cdn.aeman.nl/AE_Hammertime/thumb/56f0483a-1267-4822-b234-f2be0539194a",bron:"hammertime",locatie:"België"},
+  {id:"HT-93",merk:"Nissan",model:"Micra 1.2i visia pack",bouwjaar:2015,prijs:1300,biedingen:22,einddatum:"12-05-2026 20:12",link:"https://www.hammertime.be/nl/lot/lot-details/388807/nissan-micra-1-2i-visia-pack-2015",foto:"https://cdn.aeman.nl/AE_Hammertime/thumb/c64b0f9a-89d1-4847-9197-9dd67549cbec",bron:"hammertime",locatie:"België"},
+  {id:"HT-97",merk:"Nissan",model:"Qashqai 1.2 dig-t 2wd tekna",bouwjaar:2016,prijs:3650,biedingen:28,einddatum:"12-05-2026 20:12",link:"https://www.hammertime.be/nl/lot/lot-details/388808/nissan-qashqai-1-2-dig-t-2wd-tekna-2016",foto:"https://cdn.aeman.nl/AE_Hammertime/thumb/6a2c5623-98e2-4c37-b536-bcb56c1de357",bron:"hammertime",locatie:"België"},
+  {id:"HT-101",merk:"Nissan",model:"X-Trail 1.6 dci 2wd visia",bouwjaar:2016,prijs:1300,biedingen:41,einddatum:"12-05-2026 20:13",link:"https://www.hammertime.be/nl/lot/lot-details/388809/nissan-x-trail-1-6-dci-2wd-visia-2016",foto:"https://cdn.aeman.nl/AE_Hammertime/thumb/d9012f46-eb37-40e7-9990-8e2cf560b077",bron:"hammertime",locatie:"België"},
+  {id:"HT-105",merk:"Opel",model:"Adam 1.2i",bouwjaar:2015,prijs:1100,biedingen:16,einddatum:"12-05-2026 20:13",link:"https://www.hammertime.be/nl/lot/lot-details/388810/opel-adam-1-2i-2015",foto:"https://cdn.aeman.nl/AE_Hammertime/thumb/c958d45f-b6f9-4659-b902-044dd25744a6",bron:"hammertime",locatie:"België"},
+  {id:"HT-109",merk:"Opel",model:"Astra 1.7 cdti ecotec enjoy",bouwjaar:2012,prijs:270,biedingen:7,einddatum:"12-05-2026 20:14",link:"https://www.hammertime.be/nl/lot/lot-details/388811/opel-astra-1-7-cdti-ecotec-enjoy-dpf-2012",foto:"https://cdn.aeman.nl/AE_Hammertime/thumb/2c5aa6f5-bbfa-47b4-934d-f21b689458f2",bron:"hammertime",locatie:"België"},
+  {id:"HT-117",merk:"Opel",model:"Astra Sports Tourer 1.0 turbo",bouwjaar:2017,prijs:2550,biedingen:27,einddatum:"12-05-2026 20:15",link:"https://www.hammertime.be/nl/lot/lot-details/388813/opel-astra-sports-tourer-1-0-turbo-ecotec-innovation-st-2017",foto:"https://cdn.aeman.nl/AE_Hammertime/thumb/5d43ec5d-62f8-4189-8af1-14f9ade99372",bron:"hammertime",locatie:"België"},
+  {id:"HT-125",merk:"Opel",model:"Crossland X 1.2 turbo edition",bouwjaar:2017,prijs:2550,biedingen:43,einddatum:"12-05-2026 20:16",link:"https://www.hammertime.be/nl/lot/lot-details/388816/opel-crossland-x-1-2-turbo-edition-2017",foto:"https://cdn.aeman.nl/AE_Hammertime/thumb/7f681c5e-1be2-4e34-84d9-46861c7b27f5",bron:"hammertime",locatie:"België"},
+  {id:"HT-133",merk:"Peugeot",model:"2008 WSS",bouwjaar:2017,prijs:3050,biedingen:35,einddatum:"12-05-2026 20:17",link:"https://www.hammertime.be/nl/lot/lot-details/388818/peugeot-2008-wss-2017",foto:"https://cdn.aeman.nl/AE_Hammertime/thumb/bb66a39a-9fe6-4a8c-a76b-94f1a7a6984e",bron:"hammertime",locatie:"België"},
+  {id:"HT-149",merk:"Peugeot",model:"208 1.2i active",bouwjaar:2013,prijs:1300,biedingen:39,einddatum:"12-05-2026 20:19",link:"https://www.hammertime.be/nl/lot/lot-details/388822/peugeot-208-1-2i-active-2013",foto:"https://cdn.aeman.nl/AE_Hammertime/thumb/d6b39dc6-f196-4d0a-8d0c-2ade58e103f8",bron:"hammertime",locatie:"België"},
+  {id:"HT-153",merk:"Peugeot",model:"208 1.2i puretech style",bouwjaar:2016,prijs:1700,biedingen:47,einddatum:"12-05-2026 20:20",link:"https://www.hammertime.be/nl/lot/lot-details/388823/peugeot-208-1-2i-puretech-style-2016",foto:"https://cdn.aeman.nl/AE_Hammertime/thumb/29733ff5-0476-4342-a625-7ebf01be6412",bron:"hammertime",locatie:"België"},
+  {id:"HT-161",merk:"Peugeot",model:"3008 bluehdi allure pack",bouwjaar:2021,prijs:4500,biedingen:97,einddatum:"12-05-2026 20:21",link:"https://www.hammertime.be/nl/lot/lot-details/388825/peugeot-3008-bluehdi-allure-pack-130-at-2021",foto:"https://cdn.aeman.nl/AE_Hammertime/thumb/2ca6a799-cc3f-495e-8bb5-6f6cccbfdd68",bron:"hammertime",locatie:"België"},
+  {id:"HT-169",merk:"Renault",model:"Captur 0.9 tce energy life",bouwjaar:2018,prijs:1350,biedingen:48,einddatum:"12-05-2026 20:22",link:"https://www.hammertime.be/nl/lot/lot-details/388827/renault-captur-0-9-tce-energy-life-2018",foto:"https://cdn.aeman.nl/AE_Hammertime/thumb/1afcc77b-eb73-4b23-a8fd-287a6810cc4e",bron:"hammertime",locatie:"België"},
+  {id:"HT-173",merk:"Renault",model:"Clio IV 1.5 dci expression",bouwjaar:2014,prijs:1700,biedingen:46,einddatum:"12-05-2026 20:22",link:"https://www.hammertime.be/nl/lot/lot-details/388828/renault-clio-iv-1-5-dci-expression-2014",foto:"https://cdn.aeman.nl/AE_Hammertime/thumb/0b6aa9ab-e42b-4b5e-b59d-6cccaa3c2011",bron:"hammertime",locatie:"België"},
+  {id:"HT-181",merk:"Renault",model:"Kangoo Express 1.6i confort",bouwjaar:2018,prijs:3433,biedingen:55,einddatum:"12-05-2026 20:23",link:"https://www.hammertime.be/nl/lot/lot-details/388830/renault-kangoo-express-1-6i-confort-2018",foto:"https://cdn.aeman.nl/AE_Hammertime/thumb/921b71db-d68d-4519-9855-d94a08d9e615",bron:"hammertime",locatie:"België"},
+  {id:"HT-189",merk:"Renault",model:"Megane SW 1.2 tce energy limited",bouwjaar:2018,prijs:4550,biedingen:29,einddatum:"12-05-2026 20:24",link:"https://www.hammertime.be/nl/lot/lot-details/388832/renault-megane-sw-1-2-tce-energy-limited-2018",foto:"https://cdn.aeman.nl/AE_Hammertime/thumb/dc748aac-5a21-4163-9473-938db2663ca1",bron:"hammertime",locatie:"België"},
+  {id:"HT-193",merk:"Renault",model:"Zoe 40 kwh r110 limited",bouwjaar:2019,prijs:1500,biedingen:35,einddatum:"12-05-2026 20:25",link:"https://www.hammertime.be/nl/lot/lot-details/388833/renault-zoe-40-kwh-r110-limited-2-b-rent-eu6-2-108-at-2019",foto:"https://cdn.aeman.nl/AE_Hammertime/thumb/f4de253d-c1c4-4f9a-b7d2-0c031088b26a",bron:"hammertime",locatie:"België"},
+  {id:"HT-197",merk:"Seat",model:"Ateca 1.5 tsi evo style opf",bouwjaar:2019,prijs:6600,biedingen:19,einddatum:"12-05-2026 20:25",link:"https://www.hammertime.be/nl/lot/lot-details/388834/seat-ateca-1-5-tsi-evo-style-opf-2019",foto:"https://cdn.aeman.nl/AE_Hammertime/thumb/e482341b-9c55-4ad3-a18d-59e26b1c2389",bron:"hammertime",locatie:"België"},
+  {id:"HT-201",merk:"Skoda",model:"Fabia elegance tsi",bouwjaar:2013,prijs:575,biedingen:34,einddatum:"12-05-2026 20:26",link:"https://www.hammertime.be/nl/lot/lot-details/388836/skoda-fabia-elegance-tsi-2013",foto:"https://cdn.aeman.nl/AE_Hammertime/thumb/60a49e61-8aff-4ec0-a3cd-36824b695f46",bron:"hammertime",locatie:"België"},
+  {id:"HT-209",merk:"Suzuki",model:"Celerio 1.0i gl airco",bouwjaar:2018,prijs:1900,biedingen:31,einddatum:"12-05-2026 20:27",link:"https://www.hammertime.be/nl/lot/lot-details/388838/suzuki-celerio-1-0i-gl-airco-2018",foto:"https://cdn.aeman.nl/AE_Hammertime/thumb/4d43f692-d87b-410a-b49f-1019e9c9df60",bron:"hammertime",locatie:"België"},
+  {id:"HT-213",merk:"Toyota",model:"Corolla Verso 1.8i 7pl.",bouwjaar:2005,prijs:700,biedingen:5,einddatum:"12-05-2026 20:28",link:"https://www.hammertime.be/nl/lot/lot-details/388839/toyota-corolla-verso-1-8i-vvt-i-16v-linea-luna-7pl-2005",foto:"https://cdn.aeman.nl/AE_Hammertime/thumb/cc10175a-b364-4b36-936d-065d0ded9c71",bron:"hammertime",locatie:"België"},
+];
+
+// Voeg countdown toe aan Hammertime
+const hammertimeData = hammertimeRaw.map(car => {
+  const cd = getHammertimeCountdown(car.einddatum);
+  return {...car, sluitCountdown: cd ? cd.display : 'Voorbij', sluitSecs: cd ? cd.totalSecs : 0};
+});
+
+const allCars = [...troostwijkData, ...vavatoData, ...hammertimeData];
+let activeSource = 'all';
+let timerInterval = null;
+let currentFiltered = [];
+
+document.getElementById('totalCars').textContent = allCars.length;
+
+function populateFilters() {
+  const merken = [...new Set(allCars.map(c => c.merk))].sort();
+  const merkSelect = document.getElementById('merkFilter');
+  merken.forEach(m => { const o = document.createElement('option'); o.value = m; o.textContent = m; merkSelect.appendChild(o); });
+}
+
+function filterSource(src) {
+  activeSource = src;
+  document.getElementById('btnAll').className = 'source-btn' + (src==='all'?' active-all':'');
+  document.getElementById('btnTroostwijk').className = 'source-btn' + (src==='troostwijk'?' active-troostwijk':'');
+  document.getElementById('btnVavato').className = 'source-btn' + (src==='vavato'?' active-vavato':'');
+  document.getElementById('btnHammertime').className = 'source-btn' + (src==='hammertime'?' active-hammertime':'');
+  applyFilters();
+}
+
+function countdownToSecs(t) {
+  if (!t || t === 'Voorbij') return 999999;
+  const p = t.split(':');
+  return parseInt(p[0])*3600 + parseInt(p[1])*60 + parseInt(p[2]||0);
+}
+
+function applyFilters() {
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const merk = document.getElementById('merkFilter').value;
+  const prijsRange = document.getElementById('prijsFilter').value;
+  const bouwjaarRange = document.getElementById('bouwjaarFilter').value;
+  const sort = document.getElementById('sortSelect').value;
+
+  let filtered = allCars.filter(car => {
+    if (activeSource !== 'all' && car.bron !== activeSource) return false;
+    if (search && !car.merk.toLowerCase().includes(search) && !car.model.toLowerCase().includes(search)) return false;
+    if (merk && car.merk !== merk) return false;
+    if (prijsRange) {
+      const [min,max] = prijsRange.split('-').map(Number);
+      if (car.prijs < min || car.prijs > max) return false;
+    }
+    if (bouwjaarRange && car.bouwjaar) {
+      const [min,max] = bouwjaarRange.split('-').map(Number);
+      if (car.bouwjaar < min || car.bouwjaar > max) return false;
+    }
+    return true;
+  });
+
+  filtered.sort((a,b) => {
+    if (sort==='prijs-laag') return a.prijs - b.prijs;
+    if (sort==='prijs-hoog') return b.prijs - a.prijs;
+    if (sort==='biedingen') return b.biedingen - a.biedingen;
+    if (sort==='bouwjaar') return (b.bouwjaar||0) - (a.bouwjaar||0);
+    return countdownToSecs(a.sluitCountdown) - countdownToSecs(b.sluitCountdown);
+  });
+
+  currentFiltered = filtered;
+  document.getElementById('resultCount').textContent = filtered.length;
+  renderCards(filtered);
+}
+
+function renderCards(cars) {
+  if (timerInterval) clearInterval(timerInterval);
+  const grid = document.getElementById('carGrid');
+
+  if (!cars.length) {
+    grid.innerHTML = '<div class="empty-state"><h3>Geen resultaten</h3><p>Probeer een andere zoekterm of verwijder filters.</p></div>';
+    return;
+  }
+
+  grid.innerHTML = cars.map(car => {
+    const priceLabel = car.bron === 'hammertime' ? 'Huidig bod' : 'Startprijs';
+    const hot = car.biedingen > 80;
+    const soon = countdownToSecs(car.sluitCountdown) < 600;
+    return `
+      <a class="car-card" href="${car.link}" target="_blank" rel="noopener">
+        <div class="card-img-wrap">
+          <img class="card-img" src="${car.foto}" alt="${car.merk} ${car.model}" loading="lazy"
+            onerror="this.parentElement.innerHTML='<div class=\'card-img-placeholder\'>🚗</div>'" />
+          <span class="source-badge badge-${car.bron}">${car.bron==='troostwijk'?'Troostwijk':car.bron==='vavato'?'Vavato':'Hammertime'}</span>
+          ${car.sluitCountdown ? `<span class="closing-badge ${soon?'closing-soon':''}" id="cd-${car.id}">${car.sluitCountdown}</span>` : ''}
+          ${car.biedingen > 0 ? `<span class="biedingen-badge ${hot?'biedingen-hot':''}">${hot?'🔥':'⚡'} ${car.biedingen} biedingen</span>` : ''}
+        </div>
+        <div class="card-body">
+          <div class="card-make">${car.merk}</div>
+          <div class="card-model">${car.model}</div>
+          <div class="card-meta">
+            ${car.bouwjaar ? `<span>📅 ${car.bouwjaar}</span>` : ''}
+            ${car.locatie ? `<span>📍 ${car.locatie}</span>` : ''}
+          </div>
+          <div class="card-footer">
+            <div>
+              <div class="card-price">€ ${car.prijs.toLocaleString('nl-BE')}</div>
+              <div class="card-price-label">${priceLabel}</div>
+            </div>
+          </div>
+        </div>
+      </a>
+    `;
+  }).join('');
+
+  // Countdown timers voor Troostwijk/Vavato
+  const countdowns = {};
+  cars.forEach(car => {
+    if (!car.sluitCountdown || car.sluitCountdown === 'Voorbij') return;
+    let secs = countdownToSecs(car.sluitCountdown);
+    countdowns[car.id] = secs;
+  });
+
+  timerInterval = setInterval(() => {
+    Object.keys(countdowns).forEach(id => {
+      countdowns[id]--;
+      const el = document.getElementById(`cd-${id}`);
+      if (!el) return;
+      if (countdowns[id] <= 0) {
+        el.textContent = 'Gesloten';
+        el.style.color = '#EF4444';
+        return;
+      }
+      const s = countdowns[id];
+      const h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sec = s%60;
+      el.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+      if (s < 600) el.classList.add('closing-soon');
+    });
+  }, 1000);
+}
+
+document.getElementById('searchInput').addEventListener('keydown', e => { if(e.key==='Enter') applyFilters(); });
+
+populateFilters();
+applyFilters();
+</script>
+</body>
+</html>
